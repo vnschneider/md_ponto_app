@@ -3,10 +3,10 @@
 *.log
 *.pyc
 *.swp
-*.c
-*.cmake
-*.html
-*.js
+.c
+.cmake
+.html
+.js
 .env
 .DS_Store
 .atom/
