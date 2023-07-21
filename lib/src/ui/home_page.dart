@@ -158,8 +158,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     body: RefreshIndicator(
                       onRefresh: () async {
                         _controller.getActiveTasks();
-
+                        tasksActive.clear();
+                        tasksActive.addAll(_controller.tasksActive);
                         _controller.getInactiveTasks();
+                        tasksInactive.clear();
+                        tasksInactive.addAll(_controller.tasksInactive);
                       },
                       child: CustomScrollView(
                         clipBehavior: Clip.none,
