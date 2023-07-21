@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -157,17 +155,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    body: Container(
-                      height: MediaQuery.of(context).size.height,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(40),
-                          topRight: Radius.circular(40),
-                        ),
+                    body: RefreshIndicator(
+                      onRefresh: () async {
+                        _controller.getActiveTasks();
+                        tasksActive.clear();
+                        tasksActive.addAll(_controller.tasksActive);
+                        _controller.getInactiveTasks();
+                        tasksInactive.clear();
+                        tasksInactive.addAll(_controller.tasksInactive);
+                      },
+                      child: CustomScrollView(
+                        clipBehavior: Clip.none,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: <Widget>[
+                          SliverFillRemaining(
+                            child: Container(
+                              height: MediaQuery.of(context).size.height,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.background,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(40),
+                                  topRight: Radius.circular(40),
+                                ),
+                              ),
+                              child: body(),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: body(),
                     ),
                   ),
                 ),
