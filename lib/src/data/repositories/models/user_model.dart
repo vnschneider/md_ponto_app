@@ -9,7 +9,7 @@ class UserModel {
   final String userType;
   final String email;
   final num frequence;
-  final String? photo;
+  final int? photo;
 
   UserModel({
     required this.uid,
@@ -45,7 +45,9 @@ class UserModel {
       email: map['email'] as String,
       //parse the frequence to string
       frequence: map['frequence'],
-      photo: map['photo'] != null ? map['photo'] as String : '',
+      photo: map['profilePhoto'].toString().contains('http')
+          ? map['profilePhoto']
+          : int.parse(['profilePhoto'].toString()),
     );
   }
 

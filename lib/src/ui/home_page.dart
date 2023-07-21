@@ -1,10 +1,14 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:md_ponto_app/src/models/circle_avatar.dart';
 import 'package:md_ponto_app/src/models/icon_text_button.dart';
+import 'package:md_ponto_app/src/models/task_models.dart';
 import 'package:md_ponto_app/src/ui/home_page_controller.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../data/repositories/md_ponto_app_repository.dart';
 
@@ -17,25 +21,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late final AnimationController _animationController = AnimationController(
-    duration: const Duration(milliseconds: 400),
+    duration: const Duration(milliseconds: 500),
     vsync: this,
   );
-  late final AnimationController _animationController2 = AnimationController(
-    duration: const Duration(milliseconds: 400),
-    vsync: this,
-  )..addListener(() {
-      setState(() {
-        expanded.value = _animationController2.value == 1;
-        expanded.value = _animationController.value >= 0.5;
-      });
-    });
+  //create page controller
+  final _pageController = PageController(
+    initialPage: 0,
+  );
 
   late final HomeController _controller;
   late final List userData;
   late final List tasksActive;
   late final List tasksInactive;
   ValueNotifier expanded = ValueNotifier(false);
-  String uid = "cGp1hveEvbQH4fkDlJTSRmY5liG2";
+  String uid = "ACFsy9WA74c81V8pT4iBUF9hjDh2";
 
   @override
   void initState() {
@@ -58,7 +57,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _animationController2.dispose();
     super.dispose();
   }
 
@@ -72,7 +70,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 color: Colors.amber,
               )),
             )
-          : _controller.userData.isEmpty
+          : userData.isEmpty
               ? Center(
                   child: Text(
                   "Nenhum usuário encontrado",
@@ -95,34 +93,46 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               customBorder: const CircleBorder(),
                               overlayColor: MaterialStatePropertyAll(
                                   Theme.of(context).colorScheme.tertiary),
-                              child: profileCircleAvatar(context, 30.0, 0),
+                              child: ProfileCircleAvatar(
+                                      context: context,
+                                      radius: 30,
+                                      image: userData[0].photo)
+                                  .normal(),
                               onTap: () {},
                             ),
 
                             const SizedBox(width: 8.0),
                             Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  userData[0].firstName,
-                                  style: Theme.of(context).textTheme.titleLarge,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Olá, ${userData[0].firstName} ",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                    Text(
+                                        userData[0].group == 'voluntario'
+                                            ? 'Monitor voluntário'
+                                            : 'Monitor bolsista',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium),
+                                  ],
                                 ),
-                                Text(
-                                    userData[0].group == 'voluntario'
-                                        ? 'Monitor voluntário'
-                                        : 'Monitor bolsista',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium),
-                                const SizedBox(height: 2.0),
+                                // const SizedBox(height: 2.0),
                                 Text(userData[0].email,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleSmall
                                         ?.copyWith(
                                             overflow: TextOverflow.ellipsis,
+                                            fontSize: 12,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .background
@@ -165,27 +175,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   body() {
-    return Column(
-      children: [
-        !expanded.value
-            ? SlideTransition(
-                position: Tween<Offset>(
-                  begin:
-                      expanded.value ? const Offset(1, 0) : const Offset(0, 0),
-                  end: expanded.value ? const Offset(0, 0) : const Offset(1, 0),
-                ).animate(CurvedAnimation(
-                    parent: _animationController2,
-                    curve: Curves.easeInToLinear)),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 25.0, left: 20.0, right: 20.0),
-                      child: Row(
+    return Padding(
+      padding: const EdgeInsets.only(
+          top: 25.0, left: 20.0, right: 20.0, bottom: 10.0),
+      child: Column(
+        children: [
+          !expanded.value
+              ? SlideTransition(
+                  position: Tween<Offset>(
+                    begin: expanded.value
+                        ? const Offset(1, 0)
+                        : const Offset(0, 0),
+                    end: expanded.value
+                        ? const Offset(0, 0)
+                        : const Offset(1, 0),
+                  ).animate(CurvedAnimation(
+                      parent: _animationController,
+                      curve: Curves.easeInToLinear)),
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
                           Text(
-                            "Em progresso ",
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            "Em andamento ",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
+                                    fontSize: 14),
                           ),
                           Text("(${tasksActive.length.toString()})",
                               style: Theme.of(context)
@@ -197,17 +216,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           .surfaceVariant)),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 6.0),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: SizedBox(
-                        height: 190,
+                      const SizedBox(height: 6.0),
+                      SizedBox(
+                        height: 200,
                         width: MediaQuery.of(context).size.width,
                         child: ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(10),
                           ),
                           child: Obx(
                             () => _controller.taskIsLoading.value
@@ -221,128 +236,186 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 : tasksActive.isEmpty
                                     ? Center(
                                         child: Text(
-                                          "Nenhuma atividade em progresso",
+                                          "Nenhuma atividade em andamento",
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyMedium,
                                         ),
                                       )
-                                    : ListView.separated(
-                                        separatorBuilder: (context, index) =>
-                                            const SizedBox(width: 15.0),
+                                    : PageView.builder(
+                                        controller: _pageController,
                                         itemCount: tasksActive.length,
-                                        physics: const BouncingScrollPhysics(),
                                         scrollDirection: Axis.horizontal,
+                                        physics: const BouncingScrollPhysics(),
                                         itemBuilder: (context, index) {
                                           final task = tasksActive[index];
                                           return InkWell(
                                             onTap: () {},
-                                            child: taskActiveModel(
-                                                context, task, userData[0]),
+                                            child: Padding(
+                                              padding: index ==
+                                                      tasksActive.length - 1
+                                                  ? const EdgeInsets.only(
+                                                      right: 0)
+                                                  : const EdgeInsets.only(
+                                                      right: 10),
+                                              child: TaskModels(
+                                                      context: context,
+                                                      name: task.name,
+                                                      description:
+                                                          task.description,
+                                                      displayLocation:
+                                                          task.displayLocation,
+                                                      displayStartDate:
+                                                          task.displayStartDate,
+                                                      userUID: userData[0].uid,
+                                                      taskUsers: task.users)
+                                                  .activeTasks(),
+                                            ),
                                           );
-                                        },
-                                      ),
+                                        }),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Row(
+                      const SizedBox(height: 8.0),
+                      tasksActive.length > 1
+                          ? SmoothPageIndicator(
+                              controller: _pageController,
+                              count: tasksActive.length,
+                              effect: ExpandingDotsEffect(
+                                dotHeight: 10,
+                                dotWidth: 10,
+                                expansionFactor: 2,
+                                spacing: 4,
+                                dotColor: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant
+                                    .withOpacity(0.4),
+                                activeDotColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                            )
+                          : const SizedBox(),
+                      const SizedBox(height: 12.0),
+                      Row(
                         children: [
-                          iconTextButton(context, Iconsax.note_favorite,
-                              "Adicionar aula", () {})
+                          IconTextButton(
+                            context: context,
+                            icon: Iconsax.note_favorite,
+                            text: "Adicionar aula",
+                            onPressed: () {},
+                          ).variant1(),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              )
-            : const SizedBox(),
-        !expanded.value ? const Spacer() : const SizedBox(),
-        SlideTransition(
-          position: Tween<Offset>(
-            begin: expanded.value ? const Offset(0, 0.1) : const Offset(0, 0.0),
-            end: expanded.value ? const Offset(0, 0.0) : const Offset(0, 0.1),
-          ).animate(CurvedAnimation(
-              parent: _animationController, curve: Curves.easeInOut)),
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.only(top: 25.0, left: 20.0, right: 20.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Finalizadas",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      InkWell(
-                        customBorder: const RoundedRectangleBorder(),
-                        overlayColor: MaterialStatePropertyAll(
-                            Theme.of(context).colorScheme.primary),
-                        highlightColor: Theme.of(context).colorScheme.secondary,
-                        onTap: () {
-                          setState(() {
-                            !expanded.value
-                                ? {
-                                    _animationController.forward(),
-                                    _animationController2.forward(),
-                                    expanded.value = !expanded.value,
-                                  }
-                                : {
-                                    _animationController.reverse(),
-                                    _animationController2.reverse(),
-                                    expanded.value = !expanded.value,
-                                  };
-                          });
-                        },
-                        child: Text(
-                          expanded.value ? "Ver menos" : "Ver mais",
+                    ],
+                  ),
+                )
+              : const SizedBox(),
+          !expanded.value ? const Spacer() : const SizedBox(),
+          SlideTransition(
+            position: Tween<Offset>(
+              begin:
+                  expanded.value ? const Offset(0, 0.4) : const Offset(0, 0.0),
+              end: expanded.value ? const Offset(0, 0.0) : const Offset(0, 0.2),
+            ).animate(CurvedAnimation(
+                parent: _animationController, curve: Curves.easeInOut)),
+            child: Column(
+              children: [
+                GestureDetector(
+                  onVerticalDragEnd: (_) {
+                    if (expanded.value) {
+                      _animationController.reverse();
+                      setState(() => expanded.value = !expanded.value);
+                    }
+                  },
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Finalizadas",
                           style: Theme.of(context)
                               .textTheme
-                              .bodyMedium
+                              .bodyLarge
                               ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceVariant),
+                                  color: Theme.of(context).colorScheme.surface,
+                                  fontSize: 14),
                         ),
-                      ),
-                    ]),
-              ),
-              const SizedBox(height: 6.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: SizedBox(
+                        IconTextButton(
+                            context: context,
+                            icon: expanded.value
+                                ? Iconsax.arrow_down_1
+                                : Iconsax.arrow_up_2,
+                            text: expanded.value ? "Recolher" : "Expandir",
+                            onPressed: () {
+                              setState(() {
+                                !expanded.value
+                                    ? {
+                                        _animationController.forward(),
+                                        // _animationController2.forward(),
+                                        expanded.value = !expanded.value,
+                                      }
+                                    : {
+                                        _animationController.reverse(),
+                                        // _animationController2.reverse(),
+                                        expanded.value = !expanded.value,
+                                      };
+                              });
+                            }).variant2(),
+                      ]),
+                ),
+                const SizedBox(height: 6.0),
+                SizedBox(
                   height: expanded.value
                       ? MediaQuery.of(context).size.height / 1.28
-                      : MediaQuery.of(context).size.height * 0.4,
+                      : MediaQuery.of(context).size.height * 0.43,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Hero(
-                      tag: "listTasks",
-                      transitionOnUserGestures: true,
-                      child: ListView.separated(
-                        separatorBuilder: (BuildContext context, int index) {
-                          return const SizedBox(height: 20.0);
-                        },
-                        itemCount: 10,
-                        physics: const BouncingScrollPhysics(),
-                        scrollDirection: Axis.vertical,
-                        itemBuilder: (context, index) {
-                          return taskFinishedModel(context);
-                        },
-                      ),
+                    child: Obx(
+                      () => _controller.taskIsLoading.value
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            )
+                          : tasksInactive.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    "Nenhuma atividade finalizada",
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                )
+                              : ListView.separated(
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(height: 15.0),
+                                  itemCount: tasksInactive.length,
+                                  physics: const BouncingScrollPhysics(),
+                                  scrollDirection: Axis.vertical,
+                                  itemBuilder: (context, index) {
+                                    final task = tasksInactive[index];
+                                    return InkWell(
+                                      onTap: () {},
+                                      child: TaskModels(
+                                              context: context,
+                                              name: task.name,
+                                              description: task.description,
+                                              displayLocation:
+                                                  task.displayLocation,
+                                              displayStartDate:
+                                                  task.displayStartDate,
+                                              userUID: userData[0].uid,
+                                              taskUsers: task.users)
+                                          .inactiveTasks(),
+                                    );
+                                  },
+                                ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )
-      ],
+        ],
+      ),
     );
   }
 }
@@ -373,197 +446,5 @@ taskFinishedModel(context) {
         ),
       ],
     ),
-  );
-}
-
-taskActiveModel(context, task, userData) {
-  return Stack(
-    alignment: Alignment.bottomCenter,
-    children: [
-      Container(
-        width: MediaQuery.of(context).size.width - 40,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(top: 12, bottom: 18, left: 12, right: 12),
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            // mainAxisSize: MainAxisSize.min,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.background),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Row(
-                    children: [
-                      Icon(
-                        Iconsax.location,
-                        size: 12,
-                        color: Theme.of(context).colorScheme.background,
-                      ),
-                      const SizedBox(width: 4.0),
-                      Text(
-                        task.displayLocation,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w100,
-                            color: Theme.of(context).colorScheme.background),
-                      ),
-                      const SizedBox(width: 10.0),
-                      Icon(
-                        Iconsax.clock,
-                        size: 12,
-                        color: Theme.of(context).colorScheme.background,
-                      ),
-                      const SizedBox(width: 4.0),
-                      Text(
-                        task.displayStartDate,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w100,
-                            color: Theme.of(context).colorScheme.background),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              // const SizedBox(height: 6.0),
-              Divider(color: Theme.of(context).colorScheme.background),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Descrição:",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .background
-                            .withOpacity(0.8)),
-                  ),
-                  // const SizedBox(height: 4.0),
-                  Text(
-                    task.description.toString(),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.background),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Time:",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                  fontSize: 14,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .background
-                                      .withOpacity(0.8))),
-                      const SizedBox(height: 4.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          ProfileCircleAvatar(
-                                  context: context, radius: 10.0, image: 1)
-                              .small(),
-                          ProfileCircleAvatar(
-                                  context: context, radius: 10.0, image: 2)
-                              .small(),
-                          ProfileCircleAvatar(
-                                  context: context, radius: 10.0, image: 3)
-                              .small(),
-                          ProfileCircleAvatar(
-                                  context: context, radius: 10.0, image: 4)
-                              .small(),
-                        ],
-                      )
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("Progresso:",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                  fontSize: 14,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .background
-                                      .withOpacity(0.8))),
-                      const SizedBox(height: 4.0),
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              value: 0.7,
-                              color: Theme.of(context).colorScheme.background,
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .background
-                                  .withOpacity(0.2),
-                            ),
-                          ),
-                          const SizedBox(width: 4.0),
-                          Text(
-                            "70%",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                    fontSize: 15,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .background),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      Container(
-        height: 8,
-        width: MediaQuery.of(context).size.width - 40,
-        decoration: BoxDecoration(
-          color: task.users.toString().contains(userData.uid)
-              ? Theme.of(context).colorScheme.onSecondary
-              : Theme.of(context).colorScheme.onPrimary,
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(10.0),
-            bottomRight: Radius.circular(10.0),
-          ),
-        ),
-      ),
-    ],
   );
 }

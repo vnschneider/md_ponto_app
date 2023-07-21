@@ -37,6 +37,7 @@ ThemeData lightTheme() {
       surface: Color(0xCC343A40),
       surfaceVariant: Color(0xFFD4D4D8),
       onSurface: Color(0xFFFFFFFF),
+      onSurfaceVariant: Color(0xFF545454),
       //custom color scheme
       error: Color(0xFFF6533D),
       onPrimary: Color(0xFFFFCD34),

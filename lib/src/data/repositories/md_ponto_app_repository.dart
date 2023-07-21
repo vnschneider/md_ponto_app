@@ -29,20 +29,22 @@ class PontoAppRepository {
     final result = await dio.get('${dotenv.env['API_URL']}/findUser/$uid');
     final List<UserModel> userData = [];
     if (result.statusCode == 200) {
-      for (var item in result.data) {
-        userData.add(
-          UserModel(
-            uid: item['uid'],
-            firstName: item['firstName'],
-            lastName: item['lastName'],
-            group: item['group'],
-            userType: item['userType'],
-            email: item['email'],
-            frequence: item['frequence'],
-            photo: item['photo'],
-          ),
-        );
-      }
+      result.data
+          .map(
+            (item) => userData.add(
+              UserModel(
+                  uid: item['uid'],
+                  firstName: item['firstName'],
+                  lastName: item['lastName'],
+                  group: item['group'],
+                  userType: item['userType'],
+                  email: item['email'],
+                  frequence: item['frequence'],
+                  photo: int.parse(item['profilePhoto'])),
+            ),
+          )
+          .toList();
+
       return userData.toList();
     } else {
       throw Exception('Failed to load user');
@@ -107,7 +109,7 @@ class PontoAppRepository {
     final List<TaskModel> tasksInactive = [];
     if (result.statusCode == 200) {
       for (var item in result.data) {
-        if (item['status'] == "active") {
+        if (item['status'] == "inactive") {
           tasksInactive.add(
             TaskModel(
               id: item['_id'],

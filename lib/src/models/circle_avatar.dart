@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
-class ProfileCircleAvatar{
+class ProfileCircleAvatar {
   final BuildContext context;
   final double radius;
   final int image;
@@ -23,7 +22,8 @@ class ProfileCircleAvatar{
 
       child: CircleAvatar(
         radius: radius,
-        backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.6),
+        backgroundColor:
+            Theme.of(context).colorScheme.secondary.withOpacity(0.6),
         child: Padding(
           padding: const EdgeInsets.all(2.0),
           child: SvgPicture.asset(
@@ -37,17 +37,19 @@ class ProfileCircleAvatar{
     );
   }
 
-  Widget small(){
+  Widget small({bool light = false}) {
     return Container(
       decoration: BoxDecoration(
           border: Border.all(
-              color: Theme.of(context).colorScheme.background, width: 1),
+              color: Theme.of(context).colorScheme.background, width: 1.5),
           borderRadius: BorderRadius.circular(100)),
       // alignment: Alignment.center,
 
       child: CircleAvatar(
         radius: radius,
-        backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.6),
+        backgroundColor: light
+            ? Theme.of(context).colorScheme.primary.withOpacity(0.4)
+            : Theme.of(context).colorScheme.secondary.withOpacity(0.6),
         child: Padding(
           padding: const EdgeInsets.all(0.5),
           child: SvgPicture.asset(
@@ -61,30 +63,3 @@ class ProfileCircleAvatar{
     );
   }
 }
-
-
-profileCircleAvatar(context, radius, image) {
-  
-  return Container(
-    decoration: BoxDecoration(
-        border: Border.all(
-            color: Theme.of(context).colorScheme.background, width: 4),
-        borderRadius: BorderRadius.circular(100)),
-    // alignment: Alignment.center,
-
-    child: CircleAvatar(
-      radius: radius,
-      backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.6),
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: SvgPicture.asset(
-          alignment: Alignment.center,
-          fit: BoxFit.contain,
-          semanticsLabel: 'Avatar',
-          'assets/avatars/avatar$image.svg',
-        ),
-      ),
-    ),
-  );
-}
-
